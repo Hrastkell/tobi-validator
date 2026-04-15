@@ -1,0 +1,318 @@
+[
+  {
+    "name": "seq-ascii-semicolon",
+    "input": "atomic{ let x = 1 in x; let y = 2 in y }",
+    "expected_canonical": "seq([bind(ID(x), DEC(1), ID(x)), bind(ID(y), DEC(2), ID(y))])",
+    "expected_hash_hex": "756a7889a958b394c1f73e99c7886b5c3ccf39ffe4c3892cd580d68d01cefa96"
+  },
+  {
+    "name": "seq-legacy-triangle",
+    "input": "atomic{ let x = 1 in x \u25B7 let y = 2 in y }",
+    "expected_canonical": "seq([bind(ID(x), DEC(1), ID(x)), bind(ID(y), DEC(2), ID(y))])",
+    "expected_hash_hex": "756a7889a958b394c1f73e99c7886b5c3ccf39ffe4c3892cd580d68d01cefa96"
+  },
+  {
+    "name": "seq-mixed-legacy-input",
+    "input": "atomic{ let x = 1 in x; let y = 2 in y \u25B7 let z = 3 in z; }",
+    "expected_canonical": "seq([bind(ID(x), DEC(1), ID(x)), bind(ID(y), DEC(2), ID(y)), bind(ID(z), DEC(3), ID(z))])",
+    "expected_hash_hex": "eea9583761e71421b69f810a70db4ab4ac7e12306938d5e02c04b78edfa06d9b"
+  },
+  {
+    "name": "dec-equivalence-plain",
+    "input": "let x = 1 in x",
+    "expected_canonical": "bind(ID(x), DEC(1), ID(x))",
+    "expected_hash_hex": "8529c28715d07069fe135dde07ed73db49fa690d5f7b1874dea47760f3321f06"
+  },
+  {
+    "name": "dec-equivalence-float-tail-zero",
+    "input": "let x = 1.0 in x",
+    "expected_canonical": "bind(ID(x), DEC(1), ID(x))",
+    "expected_hash_hex": "8529c28715d07069fe135dde07ed73db49fa690d5f7b1874dea47760f3321f06"
+  },
+  {
+    "name": "dec-equivalence-leading-zeros",
+    "input": "let x = 01.000 in x",
+    "expected_canonical": "bind(ID(x), DEC(1), ID(x))",
+    "expected_hash_hex": "8529c28715d07069fe135dde07ed73db49fa690d5f7b1874dea47760f3321f06"
+  },
+  {
+    "name": "dec-equivalence-underscores",
+    "input": "let x = 0_0_1.0_0_0 in x",
+    "expected_canonical": "bind(ID(x), DEC(1), ID(x))",
+    "expected_hash_hex": "8529c28715d07069fe135dde07ed73db49fa690d5f7b1874dea47760f3321f06"
+  },
+  {
+    "name": "dec-equivalence-zero-plain",
+    "input": "let x = 0 in x",
+    "expected_canonical": "bind(ID(x), DEC(0), ID(x))",
+    "expected_hash_hex": "2354ef80b1c972f05d0ae13ff9e5e05dffa6fef75ba1160a77856186ee9fb92c"
+  },
+  {
+    "name": "dec-equivalence-zero-tail",
+    "input": "let x = 0.000 in x",
+    "expected_canonical": "bind(ID(x), DEC(0), ID(x))",
+    "expected_hash_hex": "2354ef80b1c972f05d0ae13ff9e5e05dffa6fef75ba1160a77856186ee9fb92c"
+  },
+  {
+    "name": "dec-trim-fraction-tail",
+    "input": "let x = 12.3400 in x",
+    "expected_canonical": "bind(ID(x), DEC(1234,2), ID(x))",
+    "expected_hash_hex": "886d2ca8a155ae6a9d1da17081e12c54c3d2a97f6f79ccd08e3a1b7a669e3dfb"
+  },
+  {
+    "name": "note-equivalence-ascii",
+    "input": "note \"hi\" (let x = 2 in x)",
+    "expected_canonical": "CALL(ID(note), [STR(\"hi\"), bind(ID(x), DEC(2), ID(x))])",
+    "expected_hash_hex": "be86fb6cc6c8003e1b6b7477ae50e1624c9366a59780d615cce06e2a3954f2a2"
+  },
+  {
+    "name": "note-equivalence-skin",
+    "input": "@note \"hi\" (\u30EC\u30C3\u30C8 x = 2 \u30A4\u30F3 x)",
+    "expected_canonical": "CALL(ID(note), [STR(\"hi\"), bind(ID(x), DEC(2), ID(x))])",
+    "expected_hash_hex": "be86fb6cc6c8003e1b6b7477ae50e1624c9366a59780d615cce06e2a3954f2a2"
+  },
+  {
+    "name": "ops-equivalence-ascii",
+    "input": "match (1 >= 1) with | true -> 1 | false -> 0",
+    "expected_canonical": "match CALL(ID(__ge), [DEC(1), DEC(1)]) with | true -> DEC(1) | false -> DEC(0)",
+    "expected_hash_hex": "ce887095d3b519859c9d6f6c16a4f869bba5aabab44499fb200437e207483e75"
+  },
+  {
+    "name": "ops-equivalence-skin",
+    "input": "\u30DE\u30C3\u30C1 (1 \u2265 1) \u30A6\u30A3\u30BA \u2502 true \u2192 1 \u2502 false \u2192 0",
+    "expected_canonical": "match CALL(ID(__ge), [DEC(1), DEC(1)]) with | true -> DEC(1) | false -> DEC(0)",
+    "expected_hash_hex": "ce887095d3b519859c9d6f6c16a4f869bba5aabab44499fb200437e207483e75"
+  },
+  {
+    "name": "let-equivalence-skin-basic",
+    "input": "\u30EC\u30C3\u30C8 x = 1 \u30A4\u30F3 x",
+    "expected_canonical": "bind(ID(x), DEC(1), ID(x))",
+    "expected_hash_hex": "8529c28715d07069fe135dde07ed73db49fa690d5f7b1874dea47760f3321f06"
+  },
+  {
+    "name": "seq-note-ascii",
+    "input": "atomic{ note \"hi\" (let x = 2 in x); let y = 3 in y }",
+    "expected_canonical": "seq([CALL(ID(note), [STR(\"hi\"), bind(ID(x), DEC(2), ID(x))]), bind(ID(y), DEC(3), ID(y))])",
+    "expected_hash_hex": "efb7b8296aa50395730c17983a32da1a37b435149c6ef96b50ac21771fa62776"
+  },
+  {
+    "name": "seq-note-skin",
+    "input": "atomic{ @note \"hi\" (\u30EC\u30C3\u30C8 x = 2 \u30A4\u30F3 x) \u25B7 \u30EC\u30C3\u30C8 y = 3 \u30A4\u30F3 y }",
+    "expected_canonical": "seq([CALL(ID(note), [STR(\"hi\"), bind(ID(x), DEC(2), ID(x))]), bind(ID(y), DEC(3), ID(y))])",
+    "expected_hash_hex": "efb7b8296aa50395730c17983a32da1a37b435149c6ef96b50ac21771fa62776"
+  },
+  {
+    "name": "ops-bool-equivalence-ascii",
+    "input": "match (!false && true || false) with | true -> 1 | false -> 0",
+    "expected_canonical": "match CALL(ID(__or), [CALL(ID(__and), [CALL(ID(__not), [ID(false)]), ID(true)]), ID(false)]) with | true -> DEC(1) | false -> DEC(0)",
+    "expected_hash_hex": "b4ea59791e5a4adcedd39cb17459c0e3a117f5be1f14ed78489f5bce0a057217"
+  },
+  {
+    "name": "ops-bool-equivalence-skin",
+    "input": "\u30DE\u30C3\u30C1 (\u00ACfalse \u2227 true \u2228 false) \u30A6\u30A3\u30BA \u2502 true \u2192 1 \u2502 false \u2192 0",
+    "expected_canonical": "match CALL(ID(__or), [CALL(ID(__and), [CALL(ID(__not), [ID(false)]), ID(true)]), ID(false)]) with | true -> DEC(1) | false -> DEC(0)",
+    "expected_hash_hex": "b4ea59791e5a4adcedd39cb17459c0e3a117f5be1f14ed78489f5bce0a057217"
+  },
+  {
+    "name": "err-dec-trailing-dot",
+    "input": "let x = 1. in x",
+    "expected_error_code": "E013",
+    "expected_error_message_contains": "invalid number literal",
+    "expected_error_span_present": true
+  },
+  {
+    "name": "err-dec-plus-sign",
+    "input": "let x = +1 in x",
+    "expected_error_code": "E010",
+    "expected_error_message_contains": "unexpected character",
+    "expected_error_span_present": true
+  },
+  {
+    "name": "err-dec-leading-dot",
+    "input": "let x = .5 in x",
+    "expected_error_code": "E010",
+    "expected_error_message_contains": "unexpected character",
+    "expected_error_span_present": true
+  },
+  {
+    "name": "err-float-exponent-unsupported",
+    "input": "let x = 1e3 in x",
+    "expected_error_code": "E023",
+    "expected_error_message_contains": "expected 'in' after let value",
+    "expected_error_span_present": true
+  },
+  {
+    "name": "err-float-double-dot",
+    "input": "let x = 1.2.3 in x",
+    "expected_error_code": "E010",
+    "expected_error_message_contains": "unexpected character",
+    "expected_error_span_present": true
+  },
+  {
+    "name": "err-forbidden-unicode",
+    "input": "let x = 1 in x\u202E",
+    "expected_error_code": "E003",
+    "expected_error_message_contains": "forbidden unicode scalar",
+    "expected_error_span_present": true
+  },
+  {
+    "name": "err-ordering-named-args",
+    "input": "foo(a: 1, b: 2)",
+    "expected_error_code": "E021",
+    "expected_error_message_contains": "expected ')'",
+    "expected_error_span_present": true
+  },
+  {
+    "name": "err-ordering-meta-trap",
+    "input": "foo(meta{b:2,a:1})",
+    "expected_error_code": "E021",
+    "expected_error_message_contains": "expected ')'",
+    "expected_error_span_present": true
+  },
+  {
+    "name": "err-meas-suffix-unsupported",
+    "input": "let x = 10kg in x",
+    "expected_error_code": "E023",
+    "expected_error_message_contains": "expected 'in' after let value",
+    "expected_error_span_present": true
+  },
+  {
+    "name": "err-meas-space-suffix-unsupported",
+    "input": "let x = 10 kg in x",
+    "expected_error_code": "E023",
+    "expected_error_message_contains": "expected 'in' after let value",
+    "expected_error_span_present": true
+  },
+  {
+    "name": "sem-ok-barrier-explicit",
+    "input": "atomic{ match (to_dec(to_flt(1)) >= 1) with | true -> 1 | false -> 0 }",
+    "expected_canonical": "seq([match CALL(ID(__ge), [CALL(ID(to_dec), [CALL(ID(to_flt), [DEC(1)])]), DEC(1)]) with | true -> DEC(1) | false -> DEC(0)])",
+    "expected_hash_hex": "8d3557bfd7b03ea3e4943341ad98ca848de26c0a3af854719d2d8e938260a0cf"
+  },
+  {
+    "name": "sem-ok-unresolved-callable-passthrough",
+    "input": "foo(1, \"x\")",
+    "expected_canonical": "CALL(ID(foo), [DEC(1), STR(\"x\")])",
+    "expected_hash_hex": "e28e22f5a6e317a4aec5b91ba6315865acdcb78a80ea0fb288ed9755bc1aa340"
+  },
+  {
+    "name": "sem-ok-builtin-bool-explicit",
+    "input": "__and(true, __not(false))",
+    "expected_canonical": "CALL(ID(__and), [ID(true), CALL(ID(__not), [ID(false)])])",
+    "expected_hash_hex": "df8297f6df2d1bfe61a12833f66f9c9f2d4a7ac5d08751ad0087d07eee60db7e"
+  },
+  {
+    "name": "sem-ok-atomic-local-to-flt",
+    "input": "atomic{ to_flt(1, \"sensor\"); let y = 2 in y }",
+    "expected_canonical": "seq([CALL(ID(to_flt), [DEC(1), STR(\"sensor\")]), bind(ID(y), DEC(2), ID(y))])",
+    "expected_hash_hex": "dac2782f858e1c306ec298683330fcee6153ef7eaebf9d1b55fb998cdd61214e"
+  },
+  {
+    "name": "err-sem-call-arity-not",
+    "input": "__not(true, false)",
+    "expected_error_code": "E100",
+    "expected_error_message_contains": "expects 1 arguments",
+    "expected_error_span_present": true,
+    "expected_error_span_start": 0,
+    "expected_error_span_end": 5
+  },
+  {
+    "name": "err-sem-call-type-and",
+    "input": "__and(1, true)",
+    "expected_error_code": "E102",
+    "expected_error_message_contains": "expects bool arguments",
+    "expected_error_span_present": true,
+    "expected_error_span_start": 6,
+    "expected_error_span_end": 7
+  },
+  {
+    "name": "err-sem-match-arm-type-mismatch",
+    "input": "match true with | true -> 1 | false -> \"x\"",
+    "expected_error_code": "E103",
+    "expected_error_message_contains": "match arm result type mismatch",
+    "expected_error_span_present": true,
+    "expected_error_span_start": 39,
+    "expected_error_span_end": 42
+  },
+  {
+    "name": "err-sem-pattern-type-mismatch",
+    "input": "match 1 with | true -> 1 | false -> 0",
+    "expected_error_code": "E106",
+    "expected_error_message_contains": "boolean pattern requires bool scrutinee",
+    "expected_error_span_present": true,
+    "expected_error_span_start": 15,
+    "expected_error_span_end": 19
+  },
+  {
+    "name": "err-sem-atomic-only-outside-atomic",
+    "input": "to_flt(1)",
+    "expected_error_code": "E104",
+    "expected_error_message_contains": "atomic-only operation must appear inside atomic",
+    "expected_error_span_present": true,
+    "expected_error_span_start": 0,
+    "expected_error_span_end": 6
+  },
+  {
+    "name": "err-sem-barrier-required",
+    "input": "atomic{ match (to_flt(1) >= 1) with | true -> 1 | false -> 0 }",
+    "expected_error_code": "E105",
+    "expected_error_message_contains": "requires explicit barrier conversion via to_dec",
+    "expected_error_span_present": true,
+    "expected_error_span_start": 15,
+    "expected_error_span_end": 21
+  },
+  {
+    "name": "err-sem-hidden-effect-note-in-value",
+    "input": "let x = note \"hi\" (1) in x",
+    "expected_error_code": "E104",
+    "expected_error_message_contains": "effectful expression is not allowed in pure value position",
+    "expected_error_span_present": true,
+    "expected_error_span_start": 8,
+    "expected_error_span_end": 21
+  },
+  {
+    "name": "err-sem-hidden-effect-atomic-in-value",
+    "input": "let x = atomic{ let y = 1 in y } in x",
+    "expected_error_code": "E104",
+    "expected_error_message_contains": "effectful expression is not allowed in pure value position",
+    "expected_error_span_present": true,
+    "expected_error_span_start": 8,
+    "expected_error_span_end": 32
+  },
+  {
+    "name": "err-sem-local-value-not-callable",
+    "input": "let f = 1 in f(2)",
+    "expected_error_code": "E107",
+    "expected_error_message_contains": "local value 'f' is not callable in MVP",
+    "expected_error_span_present": true,
+    "expected_error_span_start": 13,
+    "expected_error_span_end": 14
+  },
+  {
+    "name": "err-sem-builtin-context-type",
+    "input": "atomic{ to_flt(1, 2) }",
+    "expected_error_code": "E102",
+    "expected_error_message_contains": "optional context argument must be string",
+    "expected_error_span_present": true,
+    "expected_error_span_start": 18,
+    "expected_error_span_end": 19
+  },
+  {
+    "name": "err-sem-bool-literal-not-callable",
+    "input": "true(1)",
+    "expected_error_code": "E107",
+    "expected_error_message_contains": "is not callable in MVP",
+    "expected_error_span_present": true,
+    "expected_error_span_start": 0,
+    "expected_error_span_end": 4
+  },
+  {
+    "name": "err-sem-eq-type-mismatch",
+    "input": "__eq(1, \"x\")",
+    "expected_error_code": "E102",
+    "expected_error_message_contains": "expects arguments of the same type",
+    "expected_error_span_present": true,
+    "expected_error_span_start": 8,
+    "expected_error_span_end": 11
+  }
+]

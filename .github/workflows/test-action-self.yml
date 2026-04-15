@@ -1,0 +1,35 @@
+name: Test Tobi Action Self
+
+on:
+  workflow_dispatch:
+
+jobs:
+  canon:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run Tobi action in canon mode
+        uses: ./
+        with:
+          dist_token: ${{ secrets.TOBI_DIST_TOKEN }}
+          version: stage1-tobi-validator-v0.7.0
+          mode: canon
+          canon_input: examples/sample.tsubasa
+
+  golden:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Run Tobi action in golden mode
+        uses: ./
+        with:
+          dist_token: ${{ secrets.TOBI_DIST_TOKEN }}
+          version: stage1-tobi-validator-v0.7.0
+          mode: golden
+          golden_fixtures: examples/golden/fixtures.json

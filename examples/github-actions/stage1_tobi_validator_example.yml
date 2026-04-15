@@ -1,0 +1,76 @@
+name: Stage 1 Tobi Validator Example
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+
+env:
+  # Replace this value with the actual validator artifact access path that applies
+  # to your usage contour.
+  TOBI_RELEASE_TAG: stage1-tobi-validator-v0.7.0
+  TOBI_ARCHIVE_NAME: stage1-tobi-validator-v0.7.0-windows-x86_64.zip
+  TOBI_ARCHIVE_SHA256_NAME: stage1-tobi-validator-v0.7.0-windows-x86_64.zip.sha256
+  TOBI_CANON_INPUT: examples/sample.tsubasa
+  TOBI_GOLDEN_FIXTURES: examples/golden/fixtures.json
+
+jobs:
+  validate:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Obtain released Tobi bundle
+        shell: powershell
+        run: |
+          throw "Replace this step with your actual validator artifact access path before using this workflow."
+
+      - name: Verify archive checksum
+        shell: powershell
+        run: |
+          $expectedLine = (Get-Content "${{ env.TOBI_ARCHIVE_SHA256_NAME }}" -Raw).Trim()
+          $expectedHash = ($expectedLine -split '\s+')[0].ToLowerInvariant()
+          $actualHash = (Get-FileHash "${{ env.TOBI_ARCHIVE_NAME }}" -Algorithm SHA256).Hash.ToLowerInvariant()
+
+          if ($actualHash -ne $expectedHash) {
+            throw "Archive checksum mismatch. Expected $expectedHash but got $actualHash."
+          }
+
+      - name: Extract released bundle
+        shell: powershell
+        run: |
+          Expand-Archive -LiteralPath "${{ env.TOBI_ARCHIVE_NAME }}" -DestinationPath ".\\tobi-bundle" -Force
+
+      - name: Run canon gate
+        shell: powershell
+        run: |
+          $canonInput = "${{ env.TOBI_CANON_INPUT }}"
+          if (-not (Test-Path -LiteralPath $canonInput)) {
+            throw "Canon input not found: $canonInput"
+          }
+          $canonPath = (Resolve-Path -LiteralPath $canonInput).Path
+          Push-Location .\\tobi-bundle
+          try {
+            .\\tobi.exe canon $canonPath
+          }
+          finally {
+            Pop-Location
+          }
+
+      - name: Run golden gate
+        shell: powershell
+        run: |
+          $fixtures = "${{ env.TOBI_GOLDEN_FIXTURES }}"
+          if (-not (Test-Path -LiteralPath $fixtures)) {
+            throw "Fixture file not found: $fixtures"
+          }
+          $fixturesPath = (Resolve-Path -LiteralPath $fixtures).Path
+          Push-Location .\\tobi-bundle
+          try {
+            .\\tobi.exe golden $fixturesPath
+          }
+          finally {
+            Pop-Location
+          }

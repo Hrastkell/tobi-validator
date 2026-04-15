@@ -1,0 +1,3 @@
+let x = 98.0 in
+match x with
+  | _ -> foo(x)

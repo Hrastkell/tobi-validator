@@ -1,0 +1,136 @@
+[
+    {
+        "name":  "dec-equivalence-plain",
+        "input":  "let x = 1 in x",
+        "expected_canonical":  "bind(ID(x), DEC(1), ID(x))",
+        "expected_hash_hex":  "8529c28715d07069fe135dde07ed73db49fa690d5f7b1874dea47760f3321f06"
+    },
+    {
+        "name":  "dec-equivalence-float-tail-zero",
+        "input":  "let x = 1.0 in x",
+        "expected_canonical":  "bind(ID(x), DEC(1), ID(x))",
+        "expected_hash_hex":  "8529c28715d07069fe135dde07ed73db49fa690d5f7b1874dea47760f3321f06"
+    },
+    {
+        "name":  "seq-ascii-semicolon",
+        "input":  "atomic{ let x = 1 in x; let y = 2 in y }",
+        "expected_canonical":  "seq([bind(ID(x), DEC(1), ID(x)), bind(ID(y), DEC(2), ID(y))])",
+        "expected_hash_hex":  "756a7889a958b394c1f73e99c7886b5c3ccf39ffe4c3892cd580d68d01cefa96"
+    },
+    {
+        "name":  "seq-legacy-triangle",
+        "input":  "atomic{ let x = 1 in x ▷ let y = 2 in y }",
+        "expected_canonical":  "seq([bind(ID(x), DEC(1), ID(x)), bind(ID(y), DEC(2), ID(y))])",
+        "expected_hash_hex":  "756a7889a958b394c1f73e99c7886b5c3ccf39ffe4c3892cd580d68d01cefa96"
+    },
+    {
+        "name":  "ops-equivalence-ascii",
+        "input":  "match (1 \u003e= 1) with | true -\u003e 1 | false -\u003e 0",
+        "expected_canonical":  "match CALL(ID(__ge), [DEC(1), DEC(1)]) with | true -\u003e DEC(1) | false -\u003e DEC(0)",
+        "expected_hash_hex":  "ce887095d3b519859c9d6f6c16a4f869bba5aabab44499fb200437e207483e75"
+    },
+    {
+        "name":  "dec-equivalence-leading-zeros",
+        "input":  "let x = 01.000 in x",
+        "expected_canonical":  "bind(ID(x), DEC(1), ID(x))",
+        "expected_hash_hex":  "8529c28715d07069fe135dde07ed73db49fa690d5f7b1874dea47760f3321f06"
+    },
+    {
+        "name":  "let-equivalence-skin-basic",
+        "input":  "レット x = 1 イン x",
+        "expected_canonical":  "bind(ID(x), DEC(1), ID(x))",
+        "expected_hash_hex":  "8529c28715d07069fe135dde07ed73db49fa690d5f7b1874dea47760f3321f06"
+    },
+    {
+        "name":  "note-equivalence-ascii",
+        "input":  "note \"hi\" (let x = 2 in x)",
+        "expected_canonical":  "CALL(ID(note), [STR(\"hi\"), bind(ID(x), DEC(2), ID(x))])",
+        "expected_hash_hex":  "be86fb6cc6c8003e1b6b7477ae50e1624c9366a59780d615cce06e2a3954f2a2"
+    },
+    {
+        "name":  "note-equivalence-skin",
+        "input":  "@note \"hi\" (レット x = 2 イン x)",
+        "expected_canonical":  "CALL(ID(note), [STR(\"hi\"), bind(ID(x), DEC(2), ID(x))])",
+        "expected_hash_hex":  "be86fb6cc6c8003e1b6b7477ae50e1624c9366a59780d615cce06e2a3954f2a2"
+    },
+    {
+        "name":  "sem-ok-barrier-explicit",
+        "input":  "atomic{ match (to_dec(to_flt(1)) \u003e= 1) with | true -\u003e 1 | false -\u003e 0 }",
+        "expected_canonical":  "seq([match CALL(ID(__ge), [CALL(ID(to_dec), [CALL(ID(to_flt), [DEC(1)])]), DEC(1)]) with | true -\u003e DEC(1) | false -\u003e DEC(0)])",
+        "expected_hash_hex":  "8d3557bfd7b03ea3e4943341ad98ca848de26c0a3af854719d2d8e938260a0cf"
+    },
+    {
+        "name":  "err-float-double-dot",
+        "input":  "let x = 1.2.3 in x",
+        "expected_error_code":  "E010",
+        "expected_error_message_contains":  "unexpected character",
+        "expected_error_span_present":  true
+    },
+    {
+        "name":  "err-dec-plus-sign",
+        "input":  "let x = +1 in x",
+        "expected_error_code":  "E010",
+        "expected_error_message_contains":  "unexpected character",
+        "expected_error_span_present":  true
+    },
+    {
+        "name":  "err-dec-leading-dot",
+        "input":  "let x = .5 in x",
+        "expected_error_code":  "E010",
+        "expected_error_message_contains":  "unexpected character",
+        "expected_error_span_present":  true
+    },
+    {
+        "name":  "err-sem-pattern-type-mismatch",
+        "input":  "match 1 with | true -\u003e 1 | false -\u003e 0",
+        "expected_error_code":  "E106",
+        "expected_error_message_contains":  "boolean pattern requires bool scrutinee",
+        "expected_error_span_present":  true,
+        "expected_error_span_start":  15,
+        "expected_error_span_end":  19
+    },
+    {
+        "name":  "err-sem-atomic-only-outside-atomic",
+        "input":  "to_flt(1)",
+        "expected_error_code":  "E104",
+        "expected_error_message_contains":  "atomic-only operation must appear inside atomic",
+        "expected_error_span_present":  true,
+        "expected_error_span_start":  0,
+        "expected_error_span_end":  6
+    },
+    {
+        "name":  "err-sem-local-value-not-callable",
+        "input":  "let f = 1 in f(2)",
+        "expected_error_code":  "E107",
+        "expected_error_message_contains":  "local value \u0027f\u0027 is not callable in MVP",
+        "expected_error_span_present":  true,
+        "expected_error_span_start":  13,
+        "expected_error_span_end":  14
+    },
+    {
+        "name":  "err-dec-trailing-dot",
+        "input":  "let x = 1. in x",
+        "expected_error_code":  "E013",
+        "expected_error_message_contains":  "invalid number literal",
+        "expected_error_span_present":  true
+    },
+    {
+        "name":  "err-forbidden-unicode",
+        "input":  "let x = 1 in x‮",
+        "expected_error_code":  "E003",
+        "expected_error_message_contains":  "forbidden unicode scalar",
+        "expected_error_span_present":  true
+    },
+    {
+        "name":  "sem-ok-unresolved-callable-passthrough",
+        "input":  "foo(1, \"x\")",
+        "expected_canonical":  "CALL(ID(foo), [DEC(1), STR(\"x\")])",
+        "expected_hash_hex":  "e28e22f5a6e317a4aec5b91ba6315865acdcb78a80ea0fb288ed9755bc1aa340"
+    },
+    {
+        "name":  "ops-bool-equivalence-ascii",
+        "input":  "match (!false \u0026\u0026 true || false) with | true -\u003e 1 | false -\u003e 0",
+        "expected_canonical":  "match CALL(ID(__or), [CALL(ID(__and), [CALL(ID(__not), [ID(false)]), ID(true)]), ID(false)]) with | true -\u003e DEC(1) | false -\u003e DEC(0)",
+        "expected_hash_hex":  "b4ea59791e5a4adcedd39cb17459c0e3a117f5be1f14ed78489f5bce0a057217"
+    }
+]
