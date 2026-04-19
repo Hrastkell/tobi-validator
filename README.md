@@ -80,7 +80,7 @@ That means:
 
 Create a repository secret in the consuming GitHub repository:
 
-- `TOBI_DIST_TOKEN`
+- `TOBI_EVAL_TOKEN`
 
 That secret should be a **read-only fine-grained token** with access only to:
 
@@ -104,7 +104,7 @@ jobs:
 
       - uses: OrganeticSphere/tobi-validator@v1
         with:
-          dist_token: ${{ secrets.TOBI_DIST_TOKEN }}
+          dist_token: ${{ secrets.TOBI_EVAL_TOKEN }}
           mode: canon
           canon_input: examples/sample.tsubasa
 ```
@@ -127,7 +127,7 @@ jobs:
 
       - uses: OrganeticSphere/tobi-validator@v1
         with:
-          dist_token: ${{ secrets.TOBI_DIST_TOKEN }}
+          dist_token: ${{ secrets.TOBI_EVAL_TOKEN }}
           mode: golden
           golden_fixtures: examples/golden/fixtures.json
 ```

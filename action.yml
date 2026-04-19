@@ -1,10 +1,17 @@
-name: "Tobi Validator"
-description: "GitHub Action wrapper for the released Stage 1 Tobi Validator line with controlled private artifact access"
+name: "Organetic Tobi Validator"
+description: "GitHub Action wrapper for the released Stage 1 Tobi Validator line with controlled evaluation or private artifact access"
+
+branding:
+  icon: "shield"
+  color: "purple"
 
 inputs:
+  eval_token:
+    description: "7-day evaluation token issued by Organetic evaluation broker"
+    required: false
   dist_token:
     description: "Read-only token with access to the private OrganeticSphere/tobi-validator-dist repository"
-    required: true
+    required: false
   version:
     description: "Release tag in OrganeticSphere/tobi-validator-dist"
     required: false
@@ -40,16 +47,53 @@ runs:
       shell: powershell
       run: |
         $mode = "${{ inputs.mode }}".ToLowerInvariant()
+        $evalToken = "${{ inputs.eval_token }}"
+        $distToken = "${{ inputs.dist_token }}"
 
-        if ([string]::IsNullOrWhiteSpace("${{ inputs.dist_token }}")) {
-          throw "Input 'dist_token' is required. Provide a read-only token with access to OrganeticSphere/tobi-validator-dist."
+        if ([string]::IsNullOrWhiteSpace($evalToken) -and [string]::IsNullOrWhiteSpace($distToken)) {
+          throw "Provide either 'eval_token' or 'dist_token'."
         }
 
         if ($mode -ne "canon" -and $mode -ne "golden") {
           throw "Input 'mode' must be either 'canon' or 'golden'."
         }
 
-    - name: Resolve private release
+    - name: Download bundle via evaluation broker
+      if: ${{ inputs.eval_token != '' }}
+      shell: powershell
+      run: |
+        $brokerUrl = "https://api.organetic.ai/api/eval/download"
+        $version = "${{ inputs.version }}"
+        $archiveName = "${{ inputs.archive_name }}"
+        $shaName = "${{ inputs.archive_sha256_name }}"
+        $repo = "${{ github.repository }}"
+        $runId = "${{ github.run_id }}"
+        $token = "${{ inputs.eval_token }}"
+
+        $headers = @{
+          Authorization = "Bearer $token"
+          "Content-Type" = "application/json"
+        }
+
+        $archiveBody = @{
+          version = $version
+          asset = $archiveName
+          repo = $repo
+          run_id = $runId
+        } | ConvertTo-Json -Compress
+
+        $shaBody = @{
+          version = $version
+          asset = $shaName
+          repo = $repo
+          run_id = $runId
+        } | ConvertTo-Json -Compress
+
+        Invoke-WebRequest -Method POST -Uri $brokerUrl -Headers $headers -Body $archiveBody -OutFile $archiveName
+        Invoke-WebRequest -Method POST -Uri $brokerUrl -Headers $headers -Body $shaBody -OutFile $shaName
+
+    - name: Resolve private release directly
+      if: ${{ inputs.eval_token == '' && inputs.dist_token != '' }}
       shell: powershell
       run: |
         $headers = @{
@@ -86,7 +130,8 @@ runs:
         "TOBI_ASSET_URL=$($archiveAsset.url)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         "TOBI_SHA_ASSET_URL=$($shaAsset.url)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
-    - name: Download private bundle assets
+    - name: Download private bundle assets directly
+      if: ${{ inputs.eval_token == '' && inputs.dist_token != '' }}
       shell: powershell
       run: |
         $downloadHeaders = @{
@@ -135,7 +180,6 @@ runs:
         }
 
         $resolvedInput = (Resolve-Path -LiteralPath $inputPath).Path
-
         & "$env:TOBI_EXE_PATH" canon $resolvedInput
 
     - name: Run golden
@@ -148,5 +192,4 @@ runs:
         }
 
         $resolvedFixtures = (Resolve-Path -LiteralPath $fixturesPath).Path
-
         & "$env:TOBI_EXE_PATH" golden $resolvedFixtures
