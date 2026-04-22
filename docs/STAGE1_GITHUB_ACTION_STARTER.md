@@ -87,6 +87,10 @@ The minimal example in this repo is meant to show that integration shape.
 - use OrganeticSphere/tobi-validator@v1
 - run canon and/or golden
 
+##  If you need the most complete current public-safe syntax and authoring guide for repository-owned artifacts, read:
+- `docs/TSUBASA_STAGE1_PUBLIC_SYNTAX_AND_AUTHORING_REFERENCE.md`
+
+
 ## What It Does Not Imply
 
 Using this starter does not imply:

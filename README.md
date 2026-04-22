@@ -47,6 +47,7 @@ Stage 1 should not be read as:
 For the shortest public path:
 
 - [Stage 1 Quickstart](./docs/STAGE1_QUICKSTART_FIRST_10_MINUTES.md)
+- [Tsubasa Stage 1 Public Syntax And Authoring Reference](./docs/TSUBASA_STAGE1_PUBLIC_SYNTAX_AND_AUTHORING_REFERENCE.md)
 - [Stage 1 Install And Usage](./docs/STAGE1_INSTALL_AND_USAGE.md)
 - [Stage 1 Diagnostics Reference](./docs/STAGE1_DIAGNOSTICS_REFERENCE.md)
 - [Stage 1 Support And Issue Reporting](./docs/STAGE1_SUPPORT_AND_ISSUE_REPORTING.md)
